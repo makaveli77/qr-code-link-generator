@@ -1,0 +1,322 @@
+openapi: 3.0.3
+info:
+  title: QR Code Link Generator API
+  version: 1.0.0
+  description: |
+    OpenAPI documentation for the QR Code Link Generator API.
+    All endpoints are prefixed with `/api/v1`.
+servers:
+  - url: http://localhost:8000/api/v1
+paths:
+  /register:
+    post:
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '201':
+          description: User registered
+        '422':
+          description: Validation error
+  /login:
+    post:
+      summary: Login and receive API token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Authenticated
+        '401':
+          description: Invalid credentials
+  /links:
+    get:
+      summary: List all links (auth required)
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of links
+    post:
+      summary: Create a short link
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                original_url:
+                  type: string
+                custom_alias:
+                  type: string
+                expires_at:
+                  type: string
+                password:
+                  type: string
+                color:
+                  type: string
+                background_color:
+                  type: string
+                size:
+                  type: integer
+      responses:
+        '201':
+          description: Link created
+        '422':
+          description: Validation error
+  /links/{link}:
+    get:
+      summary: Get link details
+      parameters:
+        - in: path
+          name: link
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Link details
+        '404':
+          description: Not found
+    put:
+      summary: Update a link (auth required)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: link
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                original_url:
+                  type: string
+                custom_alias:
+                  type: string
+                expires_at:
+                  type: string
+                password:
+                  type: string
+                color:
+                  type: string
+                background_color:
+                  type: string
+                size:
+                  type: integer
+      responses:
+        '200':
+          description: Link updated
+        '404':
+          description: Not found
+    delete:
+      summary: Delete a link (auth required)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: link
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Link deleted
+        '404':
+          description: Not found
+  /links/{link}/qr-branding:
+    put:
+      summary: Update QR branding (auth required)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: link
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                color:
+                  type: string
+                background_color:
+                  type: string
+                size:
+                  type: integer
+                logo_path:
+                  type: string
+      responses:
+        '200':
+          description: QR branding updated
+        '404':
+          description: Not found
+  /links/{shortCode}/download-qr:
+    get:
+      summary: Download QR code image
+      parameters:
+        - in: path
+          name: shortCode
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: QR code image
+        '404':
+          description: Not found
+  /analytics/{shortCode}:
+    get:
+      summary: Get analytics for a link
+      parameters:
+        - in: path
+          name: shortCode
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Analytics data
+        '404':
+          description: Not found
+  /email/verification-notification:
+    post:
+      summary: Send email verification (auth required)
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Verification email sent
+  /email/verify/{id}/{hash}:
+    get:
+      summary: Verify email address
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: hash
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Email verified
+        '400':
+          description: Invalid verification link
+  /password/email:
+    post:
+      summary: Send password reset email
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+      responses:
+        '200':
+          description: Reset link sent
+        '400':
+          description: Unable to send reset link
+  /password/reset:
+    post:
+      summary: Reset password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token:
+                  type: string
+                email:
+                  type: string
+                password:
+                  type: string
+                password_confirmation:
+                  type: string
+      responses:
+        '200':
+          description: Password reset successful
+        '400':
+          description: Password reset failed
+  /logout:
+    post:
+      summary: Logout (auth required)
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Logged out successfully
+  /me:
+    get:
+      summary: Get current user (auth required)
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Current user info
+  /tokens:
+    get:
+      summary: List API tokens (auth required)
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of tokens
+    post:
+      summary: Create new API token (auth required)
+      security:
+        - bearerAuth: []
+      responses:
+        '201':
+          description: Token created
+  /tokens/{tokenId}:
+    delete:
+      summary: Revoke API token (auth required)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: tokenId
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Token revoked
