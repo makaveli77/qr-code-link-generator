@@ -88,6 +88,51 @@
                         <input type="datetime-local" name="expires_at" 
                             class="w-full px-5 py-4 bg-white/5 border border-white/5 rounded-2xl text-white focus:bg-white/10 focus:ring-2 focus:ring-blue-500/50 outline-none transition-all shadow-inner [color-scheme:dark]">
                     </div>
+
+                    <!-- Advanced QR Options -->
+                    <div class="md:col-span-2 mt-4 pt-6 border-t border-white/5">
+                        <h4 class="text-[10px] font-black text-blue-400 uppercase tracking-[0.2em] mb-6">Advanced QR Configuration</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div>
+                                <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2.5 ml-1">Access Password</label>
+                                <input type="password" name="password" 
+                                    class="w-full px-5 py-4 bg-white/5 border border-white/5 rounded-2xl text-white placeholder-gray-700 focus:bg-white/10 focus:ring-2 focus:ring-blue-500/50 outline-none transition-all shadow-inner text-sm" 
+                                    placeholder="Optional lock">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2.5 ml-1">Foreground Color</label>
+                                <div class="relative group">
+                                    <input type="color" name="color" value="#000000"
+                                        class="absolute inset-0 opacity-0 w-full h-full cursor-pointer">
+                                    <div class="w-full px-5 py-4 bg-white/5 border border-white/5 rounded-2xl text-white flex items-center justify-between group-hover:bg-white/10 transition-all pointer-events-none">
+                                        <span class="text-xs font-bold uppercase tracking-tight opacity-60">Select Color</span>
+                                        <div id="fg-preview" class="w-5 h-5 rounded-lg border border-white/20 shadow-lg" style="background-color: #000000;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2.5 ml-1">Background Color</label>
+                                <div class="relative group">
+                                    <input type="color" name="background_color" value="#ffffff"
+                                        class="absolute inset-0 opacity-0 w-full h-full cursor-pointer">
+                                    <div class="w-full px-5 py-4 bg-white/5 border border-white/5 rounded-2xl text-white flex items-center justify-between group-hover:bg-white/10 transition-all pointer-events-none">
+                                        <span class="text-xs font-bold uppercase tracking-tight opacity-60">Select Color</span>
+                                        <div id="bg-preview" class="w-5 h-5 rounded-lg border border-white/20 shadow-lg" style="background-color: #ffffff;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-6">
+                            <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2.5 ml-1">QR Resolution (Size)</label>
+                            <div class="flex items-center gap-4">
+                                <input type="range" name="size" min="100" max="1000" step="50" value="300"
+                                    class="flex-1 h-1.5 bg-white/5 rounded-lg appearance-none cursor-pointer accent-blue-500 outline-none"
+                                    oninput="this.nextElementSibling.innerText = this.value + 'px'">
+                                <span class="text-[10px] font-black text-blue-400 bg-blue-500/10 px-3 py-1.5 rounded-lg min-w-[50px] text-center border border-blue-500/20 uppercase tracking-widest">300px</span>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="md:col-span-2 pt-4">
                         <button class="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-5 rounded-2xl shadow-xl shadow-blue-600/20 transition-all hover:-translate-y-0.5 active:translate-y-0 uppercase tracking-widest text-sm" type="submit">
                             Generate Link & QR Code

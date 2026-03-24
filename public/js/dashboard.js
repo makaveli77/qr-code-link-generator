@@ -125,6 +125,11 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     await Promise.all([fetchLinks(), fetchTokens()]);
 
+    const fgInput = document.querySelector('input[name="color"]');
+    const bgInput = document.querySelector('input[name="background_color"]');
+    if (fgInput) fgInput.oninput = (e) => document.getElementById('fg-preview').style.backgroundColor = e.target.value;
+    if (bgInput) bgInput.oninput = (e) => document.getElementById('bg-preview').style.backgroundColor = e.target.value;
+
     document.getElementById('create-link-form').addEventListener('submit', async function(e) {
         e.preventDefault();
         const formData = new FormData(this);
