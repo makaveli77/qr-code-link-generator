@@ -20,7 +20,8 @@ This project is a high-performance QR code link management service designed for 
 - **Shorten URLs:** Generate unique QR codes and short links for any valid URL.
 - **Custom Aliases:** Users can provide a specific alias (e.g., `my-brand`) for their short links.
 - **Link Expiration:** Set expiration dates for links; expired links return `410 Gone`.
-- **Password Protection:** Optionally require a password to access a short link.
+- **Advanced QR Config:** Customize foreground/background colors and resolution (up to 1000px) directly via the dashboard or API.
+- **Security:** Integrated password protection for links and a secure Partner API gate.
 - **Partner Program:** Integrated "Partner" status with a toggle in account settings to enable/disable advanced API access.
 - **Account Management:** Premium dark-mode profile page for managing personal identity, security credentials, and partner status.
 - **QR Branding:** Customize QR code color, background, size, and logo.
@@ -193,8 +194,8 @@ This application is designed for both human users via the dashboard and **extern
 
 ## 🛠 Tech Stack
 
-- **Laravel 10**: Modern PHP framework
-- **PHP 8.x**: Latest PHP features
+- **Laravel 11**: Modern PHP framework
+- **PHP 8.4**: Latest PHP features
 - **PostgreSQL**: Robust relational database
 - **Redis**: Queue backend and caching
 - **Docker Compose**: Orchestration
