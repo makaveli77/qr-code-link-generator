@@ -5,7 +5,7 @@ use App\Http\Controllers\RedirectController;
 use App\Http\Controllers\WebAuthController;
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('dashboard');
 });
 Route::get('/login', [WebAuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [WebAuthController::class, 'login']);
