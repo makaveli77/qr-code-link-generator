@@ -145,7 +145,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             showToast('QR Code Link Created', 'bg-green-500');
             setTimeout(() => location.reload(), 800);
         } else {
-            showToast('QR Code Link Failed To Create', 'bg-red-500');
+            const errorData = await res.json().catch(() => ({})); let errorMessage = 'QR Code Link Failed To Create'; if (errorData.errors) { errorMessage = Object.values(errorData.errors).flat().join(' '); } else if (errorData.message) { errorMessage = errorData.message; } showToast(errorMessage, 'bg-red-500');
         }
     });
 
