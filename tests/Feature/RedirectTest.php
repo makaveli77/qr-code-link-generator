@@ -62,12 +62,12 @@ class RedirectTest extends TestCase
         // No password provided
         $response = $this->get('/secure123');
         $response->assertStatus(401);
-        $response->assertSee('Password required');
+        $response->assertSee('Password Required');
 
         // Wrong password
         $response = $this->get('/secure123?password=wrongpass');
         $response->assertStatus(401);
-        $response->assertSee('Password required');
+        $response->assertSee('Password Required');
 
         // Correct password
         $response = $this->get('/secure123?password=secret123');
