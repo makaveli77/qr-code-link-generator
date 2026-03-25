@@ -23,7 +23,7 @@ services:
       target: development
     container_name: laravel-app
     ports:
-      - "${FORWARD_APP_PORT:-8000}:80"
+      - "${FORWARD_APP_PORT:-8001}:80"
     volumes:
       - .:/var/www/html
     depends_on:
@@ -41,7 +41,7 @@ services:
       REDIS_HOST: redis
       QUEUE_CONNECTION: redis
       CACHE_STORE: redis
-      APP_URL: http://localhost:8000
+      APP_URL: http://localhost:${FORWARD_APP_PORT:-8001}
     restart: unless-stopped
 
   queue:
@@ -76,7 +76,7 @@ services:
     image: redis:alpine
     container_name: laravel-redis
     ports:
-      - "${FORWARD_REDIS_PORT:-6379}:6379"
+      - "${FORWARD_REDIS_PORT:-6380}:6379"
     volumes:
       - redis_data:/data
     healthcheck:
