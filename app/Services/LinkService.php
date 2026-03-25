@@ -16,10 +16,10 @@ class LinkService
 
     public function createLink(CreateLinkDTO $dto): Link
     {
-        // 1. Generate unique short code or use custom alias
+        // Generate unique short code or use custom alias
         $shortCode = $dto->customAlias ?: $this->generateUniqueShortCode();
 
-        // 2. Handle SoftDeleted links with the same alias
+        // Handle SoftDeleted links with the same alias
         if ($dto->customAlias) {
             $existing = Link::withTrashed()->where('short_code', $dto->customAlias)->first();
             if ($existing) {

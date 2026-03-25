@@ -12,9 +12,7 @@ class Kernel extends HttpKernel
      * @var array<string, array<int, class-string|string>>
      */
     protected $middlewareGroups = [
-        'web' => [
-            // ...existing web middleware...
-        ],
+        'web' => [],
 
         'api' => [
             \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
@@ -30,6 +28,5 @@ class Kernel extends HttpKernel
      */
     protected $routeMiddleware = [
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
-        // ...other middleware...
     ];
 }
