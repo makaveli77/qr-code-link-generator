@@ -21,7 +21,7 @@ This project is a high-performance QR code link management service designed for 
 - **Custom Aliases:** Users can provide a specific alias (e.g., `my-brand`) for their short links.
 - **Link Expiration:** Set expiration dates for links; expired links return `410 Gone`.
 - **Advanced QR Config:** Customize foreground/background colors and resolution (up to 1000px) directly via the dashboard or API.
-- **Security:** Integrated password protection for links and a secure Partner API gate.
+- **Security:** Integrated password protection for links with a modern dark-mode UI, and a secure Partner API gate.
 - **Partner Program:** Integrated "Partner" status with a toggle in account settings to enable/disable advanced API access.
 - **Account Management:** Premium dark-mode profile page for managing personal identity, security credentials, and partner status.
 - **QR Branding:** Customize QR code color, background, size, and logo.
