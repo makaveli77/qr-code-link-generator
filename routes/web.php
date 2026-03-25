@@ -23,6 +23,6 @@ Route::middleware(['web', 'auth'])->group(function () {
     Route::put('/profile/password', [WebAuthController::class, 'updatePassword'])->name('profile.password');
 });
 
-Route::get('/{short_code}', RedirectController::class)
+Route::match(['get', 'post'], '/{short_code}', RedirectController::class)
     ->where('short_code', '[a-zA-Z0-9\-\_]{3,20}')
     ->name('redirect');
