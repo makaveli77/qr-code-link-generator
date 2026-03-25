@@ -23,7 +23,7 @@ services:
       target: development
     container_name: laravel-app
     ports:
-      - "8000:80"
+      - "${FORWARD_APP_PORT:-8000}:80"
     volumes:
       - .:/var/www/html
     depends_on:
@@ -76,7 +76,7 @@ services:
     image: redis:alpine
     container_name: laravel-redis
     ports:
-      - "6379:6379"
+      - "${FORWARD_REDIS_PORT:-6379}:6379"
     volumes:
       - redis_data:/data
     healthcheck:

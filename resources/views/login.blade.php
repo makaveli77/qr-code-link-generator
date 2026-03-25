@@ -19,7 +19,7 @@
             @csrf
             <div style="margin-bottom: 20px;">
                 <label style="display: block; font-size: 10px; font-weight: 800; color: #9CA3AF; text-transform: uppercase; margin-bottom: 8px;">User Email</label>
-                <input type="email" name="email" required autofocus 
+                <input type="email" name="email" required autofocus value="{{ old('email') }}"
                     style="width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 12px; border-radius: 12px; color: white !important; outline: none; box-sizing: border-box;"
                     placeholder="user@example.com">
             </div>

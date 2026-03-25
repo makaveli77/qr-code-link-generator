@@ -1,32 +1,35 @@
 @echo off
-echo ======= Starting URL Shortener Setup =======
+setlocal enabledelayedexpansion
 
-echo [1/6] Building and starting Docker containers...
+echo 🚀 Starting QR Code Link Generator Setup...
+
+echo 📦 Building and starting Docker containers...
 docker compose up -d --build
 
-echo [2/6] Installing PHP dependencies...
+echo 📥 Installing PHP dependencies...
 docker compose exec app composer install
 
-echo [3/6] Setting up the database schema via migrations...
-docker compose exec app php bin/console doctrine:migrations:migrate -n
+echo 📥 Installing Node dependencies...
+docker compose exec app npm install
 
-echo [4/6] Clearing the application cache...
-docker compose exec app php bin/console cache:clear
+echo 🏗️ Building Vite assets...
+docker compose exec app npm run build
 
-echo [5/7] Preparing the test database and running the test suite...
-docker compose exec app php bin/console doctrine:database:create --env=test --if-not-exists
-docker compose exec app php bin/console doctrine:migrations:migrate -n --env=test
-docker compose exec app php bin/phpunit
+echo 🗄️ Running database migrations and seeders...
+docker compose exec app php artisan migrate --seed
 
-echo [6/7] Running static analysis (PHPStan)...
-docker compose exec app vendor/bin/phpstan analyse -c phpstan.neon.dist --memory-limit=1G
+echo 🧹 Clearing application cache...
+docker compose exec app php artisan cache:clear
 
-echo [7/7] Starting the background worker for URL click tracking...
-docker compose exec -d app php bin/console messenger:consume async
+echo 🧪 Running the test suite...
+docker compose exec app php artisan test
+
+echo ⚙️ Starting the queue worker (background)...
+docker compose exec -d queue php artisan queue:work
 
 echo.
-echo ======= Setup complete! =======
-echo API Base URL: http://localhost:8000
-echo Swagger Documentation: http://localhost:8000/api/doc
+echo ✅ Setup complete!
+echo 🌐 App URL: http://localhost:8001
+echo 📄 Swagger Documentation: http://localhost:8001/api/doc
 echo ------------------------------------------------------------------
 pause

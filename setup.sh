@@ -16,6 +16,9 @@ docker compose exec app composer install
 echo "📥 Installing Node dependencies..."
 docker compose exec app npm install
 
+echo "🏗️ Building Vite assets..."
+docker compose exec app npm run build
+
 echo "🗄️ Running database migrations and seeders..."
 docker compose exec app php artisan migrate --seed
 
@@ -30,5 +33,6 @@ docker compose exec -d queue php artisan queue:work
 
 echo ""
 echo "✅ Setup complete!"
-echo "🌐 App URL: http://localhost:8000"
+echo "🌐 App URL: http://localhost:8001"
+echo "📄 Swagger Documentation: http://localhost:8001/api/doc"
 echo "------------------------------------------------------------------"

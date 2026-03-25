@@ -95,7 +95,7 @@
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <div>
                                 <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2.5 ml-1">Access Password</label>
-                                <input type="password" name="password" 
+                                <input type="password" name="password" autocomplete="new-password"
                                     class="w-full px-5 py-4 bg-white/5 border border-white/5 rounded-2xl text-white placeholder-gray-700 focus:bg-white/10 focus:ring-2 focus:ring-blue-500/50 outline-none transition-all shadow-inner text-sm" 
                                     placeholder="Optional lock">
                             </div>
@@ -225,8 +225,8 @@
         
         <div class="relative group mb-8">
             <div class="flex items-center gap-2 bg-gray-50 border border-gray-100 rounded-2xl p-4 font-mono text-sm overflow-hidden transition-all group-hover:bg-white group-hover:border-blue-100 group-hover:shadow-sm">
-                <input type="password" id="new-token-value" readonly 
-                    class="bg-transparent border-none outline-none w-full text-gray-800 font-bold tracking-tight">
+                <input type="text" id="new-token-value" readonly 
+                    class="bg-transparent border-none outline-none w-full text-gray-800 font-bold tracking-tight" style="text-security: none; -webkit-text-security: disc;">
                 <button id="toggle-token-visibility" class="text-gray-400 hover:text-blue-600 transition-colors shrink-0">
                     <svg class="w-5 h-5" id="token-eye-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                 </button>

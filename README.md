@@ -49,7 +49,7 @@ Run the setup script to build containers (App, Database, Redis, and Queue Worker
 chmod +x setup.sh
 ./setup.sh
 ```
-- The app will be available at http://localhost:8000
+- The app will be available at http://localhost:8001
 - **Redis** is used for caching and queueing.
 - **PostgreSQL 15** is the primary database.
 
@@ -71,7 +71,7 @@ docker compose exec -d queue php artisan queue:work
 
 The dynamic API documentation (Swagger UI) is available at:
 
-👉 [http://localhost:8000/api/documentation](http://localhost:8000/api/documentation)
+👉 [http://localhost:8001/api/documentation](http://localhost:8001/api/documentation)
 
 It allows you to explore and test all available endpoints directly from your browser.
 
@@ -110,8 +110,8 @@ These scripts require `DEPLOY_WEBHOOK_URL` and `DEPLOY_TOKEN` environment variab
 ```json
 {
   "short_code": "AbCd12",
-  "short_url": "http://localhost:8000/AbCd12",
-  "qr_code_download_url": "http://localhost:8000/api/links/AbCd12/download-qr"
+  "short_url": "http://localhost:8001/AbCd12",
+  "qr_code_download_url": "http://localhost:8001/api/links/AbCd12/download-qr"
 }
 ```
 
@@ -276,3 +276,12 @@ docker compose exec app php artisan test
 ## 📃 License
 
 MIT License. See LICENSE file for details.
+
+### Troubleshooting Port Conflicts
+If you encounter a "port is already allocated" error (e.g., for port `8000` or `6379`), you can override the default exposing ports by configuring your `.env` file before setup:
+```env
+FORWARD_APP_PORT=8001
+FORWARD_REDIS_PORT=6380
+SANCTUM_STATEFUL_DOMAINS=localhost:8001,127.0.0.1:8001
+APP_URL=http://localhost:8001
+```

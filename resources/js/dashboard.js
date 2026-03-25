@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Fetch CSRF token from meta tag or cookie
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
     // Fetch links
-    const linksRes = await fetch('/api/links', { headers: authHeaders() });
+    const linksRes = await fetch('/api/links', { credentials: 'same-origin',  headers: authHeaders() });
     const linksData = await linksRes.json();
     const linksList = document.getElementById('links-list');
     linksList.innerHTML = '';
@@ -43,7 +43,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         linksList.innerHTML = '<li class="list-group-item">No links found.</li>';
     }
     // Fetch tokens
-    const tokensRes = await fetch('/api/tokens', { headers: authHeaders() });
+    const tokensRes = await fetch('/api/tokens', { credentials: 'same-origin',  headers: authHeaders() });
     const tokensData = await tokensRes.json();
     const tokensList = document.getElementById('tokens-list');
     tokensList.innerHTML = '';
@@ -73,7 +73,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             this.name.focus();
             return;
         }
-        const res = await fetch('/api/tokens', {
+        const res = await fetch('/api/tokens', { credentials: 'same-origin', 
             method: 'POST',
             headers: authHeaders({
                 'Content-Type': 'application/json',
@@ -105,7 +105,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             this.expires_at.focus();
             return;
         }
-        const res = await fetch('/api/links', {
+        const res = await fetch('/api/links', { credentials: 'same-origin', 
             method: 'POST',
             headers: authHeaders({
                 'Content-Type': 'application/json',
@@ -131,7 +131,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 });
 async function revokeToken(id) {
     if (!confirm('Revoke this API key?')) return;
-    await fetch(`/api/tokens/${id}`, { method: 'DELETE', headers: authHeaders() });
+    await fetch(`/api/tokens/${id}`, { credentials: 'same-origin',  method: 'DELETE', headers: authHeaders() });
     location.reload();
 }
 // Toast notification function
