@@ -142,10 +142,10 @@ document.addEventListener('DOMContentLoaded', async function() {
             
         });
         if (res.ok) {
-            showToast('Deployment Successful');
+            showToast('QR Code Link Created', 'bg-green-500');
             setTimeout(() => location.reload(), 800);
         } else {
-            showToast('Deployment Failed', 'bg-red-500');
+            showToast('QR Code Link Failed To Create', 'bg-red-500');
         }
     });
 
