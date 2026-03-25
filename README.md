@@ -276,12 +276,3 @@ docker compose exec app php artisan test
 ## 📃 License
 
 MIT License. See LICENSE file for details.
-
-### Troubleshooting Port Conflicts
-If you encounter a "port is already allocated" error (e.g., for port `8000` or `6379`), you can override the default exposing ports by configuring your `.env` file before setup:
-```env
-FORWARD_APP_PORT=8001
-FORWARD_REDIS_PORT=6380
-SANCTUM_STATEFUL_DOMAINS=localhost:8001,127.0.0.1:8001
-APP_URL=http://localhost:8001
-```
