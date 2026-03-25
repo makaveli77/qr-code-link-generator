@@ -14,7 +14,8 @@ class CreateLinkDTO
         public readonly string $color = '#000000',
         public readonly string $backgroundColor = '#ffffff',
         public readonly int $size = 300,
-        public readonly ?string $logoPath = null
+        public readonly ?string $logoPath = null,
+        public readonly ?string $password = null
     ) {
     }
 
@@ -28,7 +29,8 @@ class CreateLinkDTO
             color: $data['color'] ?? '#000000',
             backgroundColor: $data['background_color'] ?? '#ffffff',
             size: $data['size'] ?? 300,
-            logoPath: $data['logo_path'] ?? null
+            logoPath: $data['logo_path'] ?? null,
+            password: $data['password'] ?? null
         );
     }
 }
