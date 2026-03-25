@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                             <div class="flex-1 min-w-0">
                                 <div class="flex items-center gap-3 mb-2">
                                     <span class="bg-blue-500/10 text-blue-400 text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-widest border border-blue-500/20">
-                                        /l/${link.short_code}
+                                        /${link.short_code}
                                     </span>
                                     <span class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
                                         ${new Date(link.created_at).toLocaleDateString()}
@@ -61,8 +61,8 @@ document.addEventListener('DOMContentLoaded', async function() {
                                         </div>
                                         <div>
                                             <span class="block text-[10px] font-black text-gray-500 uppercase tracking-tighter leading-none">Short URL</span>
-                                            <a href="${window.location.origin}/l/${link.short_code}" target="_blank" class="text-xs font-bold text-blue-400 hover:underline">
-                                                ${window.location.origin.replace(/^https?:\/\//, '')}/l/${link.short_code}
+                                            <a href="${window.location.origin}/${link.short_code}" target="_blank" class="text-xs font-bold text-blue-400 hover:underline">
+                                                ${window.location.origin.replace(/^https?:\/\//, '')}/${link.short_code}
                                             </a>
                                         </div>
                                     </div>
