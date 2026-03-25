@@ -46,6 +46,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     const tokensRes = await fetch('/api/tokens', { credentials: 'same-origin',  headers: authHeaders() });
     const tokensData = await tokensRes.json();
     const tokensList = document.getElementById('tokens-list');
+        if (!tokensList) return;
     tokensList.innerHTML = '';
     if (tokensData.tokens && tokensData.tokens.length) {
         tokensData.tokens.forEach(token => {
@@ -65,7 +66,8 @@ document.addEventListener('DOMContentLoaded', async function() {
         tokensList.innerHTML = '<li class="list-group-item">No API keys found.</li>';
     }
     // Handle create token
-    document.getElementById('create-token-form').addEventListener('submit', async function(e) {
+    const ctf = document.getElementById('create-token-form');
+    if (ctf) ctf.addEventListener('submit', async function(e) {
         e.preventDefault();
         const name = this.name.value.trim();
         if (!name) {

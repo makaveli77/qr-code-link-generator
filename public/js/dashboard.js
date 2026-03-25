@@ -89,6 +89,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         const tokensRes = await fetch('/api/tokens', { credentials: 'same-origin',  headers: globalHeaders,  });
         const tokensData = await tokensRes.json();
         const tokensList = document.getElementById('tokens-list');
+        if (!tokensList) return;
         
         if (tokensData.tokens && tokensData.tokens.length) {
             tokensList.innerHTML = tokensData.tokens.map(token => `
@@ -148,7 +149,8 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
     });
 
-    document.getElementById('create-token-form').addEventListener('submit', async function(e) {
+    const ctf = document.getElementById('create-token-form');
+    if (ctf) ctf.addEventListener('submit', async function(e) {
         e.preventDefault();
         const res = await fetch('/api/tokens', { credentials: 'same-origin', 
             method: 'POST',
