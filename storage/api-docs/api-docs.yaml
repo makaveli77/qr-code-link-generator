@@ -1,322 +1,383 @@
-openapi: 3.0.3
+openapi: 3.0.0
 info:
-  title: QR Code Link Generator API
+  title: 'QR Code Link Generator API'
+  description: 'API documentation for the QR Code Link Generator application.'
   version: 1.0.0
-  description: |
-    OpenAPI documentation for the QR Code Link Generator API.
-    All endpoints are prefixed with `/api/v1`.
 servers:
-  - url: http://localhost:8000/api/v1
+  -
+    url: 'http://localhost:8001/api'
+    description: 'API Server'
 paths:
-  /register:
+  /analytics/overview:
+    get:
+      tags:
+        - Analytics
+      summary: 'Get an overview of all link analytics for the user'
+      operationId: 256f404efb9fb5047e1ff37c5b8ffc25
+      responses:
+        '200':
+          description: 'Analytics overview'
+          content:
+            application/json:
+              schema:
+                properties:
+                  total_clicks: { type: integer, example: 1540 }
+                  total_links: { type: integer, example: 5 }
+                  top_links: { type: array, items: { type: object } }
+                type: object
+      security:
+        -
+          bearerAuth: []
+  '/links/{id}/analytics':
+    get:
+      tags:
+        - Analytics
+      summary: 'Get detailed analytics for a specific link'
+      operationId: 9fca3604901e25849c56ff2a85bd4e89
+      parameters:
+        -
+          name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 'Link analytics data'
+        '404':
+          description: 'Link not found'
+      security:
+        -
+          bearerAuth: []
+  /links:
+    get:
+      tags:
+        - Links
+      summary: 'Get all links for the authenticated user'
+      operationId: a4cdfccec2072bff462ecc4a12651ca1
+      responses:
+        '200':
+          description: 'List of links'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+      security:
+        -
+          bearerAuth: []
     post:
-      summary: Register a new user
+      tags:
+        - Links
+      summary: 'Create a new short link'
+      operationId: 473714d8872dd56ff0565acb7d029ec6
       requestBody:
         required: true
         content:
           application/json:
             schema:
+              required:
+                - original_url
+              properties:
+                original_url:
+                  type: string
+                  format: uri
+                  example: 'https://google.com'
+                title:
+                  type: string
+                  example: 'Google Search'
               type: object
+      responses:
+        '201':
+          description: 'Link created'
+        '422':
+          description: 'Validation error'
+      security:
+        -
+          bearerAuth: []
+  '/links/{id}':
+    get:
+      tags:
+        - Links
+      summary: 'Get a specific link'
+      operationId: 1140569bb06802b6bda1e8aa3f5f8c89
+      parameters:
+        -
+          name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 'Link details'
+        '404':
+          description: 'Link not found'
+      security:
+        -
+          bearerAuth: []
+    put:
+      tags:
+        - Links
+      summary: 'Update an existing link'
+      operationId: e26b4a1a2fb44a2e0e00ec2aaa28c956
+      parameters:
+        -
+          name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                original_url:
+                  type: string
+                  format: uri
+                title:
+                  type: string
+              type: object
+      responses:
+        '200':
+          description: 'Link updated'
+        '404':
+          description: 'Link not found'
+      security:
+        -
+          bearerAuth: []
+    delete:
+      tags:
+        - Links
+      summary: 'Delete a link'
+      operationId: 8d796148b9d641c83be0a2dce357936d
+      parameters:
+        -
+          name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: 'Link deleted'
+        '404':
+          description: 'Link not found'
+      security:
+        -
+          bearerAuth: []
+  '/links/{id}/qr-branding':
+    post:
+      tags:
+        - Links
+      summary: 'Update QR code branding'
+      operationId: 0fc8c968d9105296cae83d51b1c58def
+      parameters:
+        -
+          name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                color:
+                  type: string
+                  example: '#000000'
+                eye_color:
+                  type: string
+                  example: '#ff0000'
+                logo_url:
+                  type: string
+                  format: uri
+                style:
+                  type: string
+                  enum: [square, round, dot]
+              type: object
+      responses:
+        '200':
+          description: 'Branding updated'
+        '404':
+          description: 'Link not found'
+      security:
+        -
+          bearerAuth: []
+  /register:
+    post:
+      tags:
+        - Authentication
+      summary: 'Register a new user'
+      operationId: 0903f2e0df1a8857bee538fc055417f0
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              required:
+                - name
+                - email
+                - password
+                - password_confirmation
               properties:
                 name:
                   type: string
+                  example: 'John Doe'
                 email:
                   type: string
+                  format: email
+                  example: john@example.com
                 password:
                   type: string
-      responses:
-        '201':
-          description: User registered
-        '422':
-          description: Validation error
-  /login:
-    post:
-      summary: Login and receive API token
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                email:
-                  type: string
-                password:
-                  type: string
-      responses:
-        '200':
-          description: Authenticated
-        '401':
-          description: Invalid credentials
-  /links:
-    get:
-      summary: List all links (auth required)
-      security:
-        - bearerAuth: []
-      responses:
-        '200':
-          description: List of links
-    post:
-      summary: Create a short link
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                original_url:
-                  type: string
-                custom_alias:
-                  type: string
-                expires_at:
-                  type: string
-                password:
-                  type: string
-                color:
-                  type: string
-                background_color:
-                  type: string
-                size:
-                  type: integer
-      responses:
-        '201':
-          description: Link created
-        '422':
-          description: Validation error
-  /links/{link}:
-    get:
-      summary: Get link details
-      parameters:
-        - in: path
-          name: link
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Link details
-        '404':
-          description: Not found
-    put:
-      summary: Update a link (auth required)
-      security:
-        - bearerAuth: []
-      parameters:
-        - in: path
-          name: link
-          required: true
-          schema:
-            type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                original_url:
-                  type: string
-                custom_alias:
-                  type: string
-                expires_at:
-                  type: string
-                password:
-                  type: string
-                color:
-                  type: string
-                background_color:
-                  type: string
-                size:
-                  type: integer
-      responses:
-        '200':
-          description: Link updated
-        '404':
-          description: Not found
-    delete:
-      summary: Delete a link (auth required)
-      security:
-        - bearerAuth: []
-      parameters:
-        - in: path
-          name: link
-          required: true
-          schema:
-            type: string
-      responses:
-        '204':
-          description: Link deleted
-        '404':
-          description: Not found
-  /links/{link}/qr-branding:
-    put:
-      summary: Update QR branding (auth required)
-      security:
-        - bearerAuth: []
-      parameters:
-        - in: path
-          name: link
-          required: true
-          schema:
-            type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                color:
-                  type: string
-                background_color:
-                  type: string
-                size:
-                  type: integer
-                logo_path:
-                  type: string
-      responses:
-        '200':
-          description: QR branding updated
-        '404':
-          description: Not found
-  /links/{shortCode}/download-qr:
-    get:
-      summary: Download QR code image
-      parameters:
-        - in: path
-          name: shortCode
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: QR code image
-        '404':
-          description: Not found
-  /analytics/{shortCode}:
-    get:
-      summary: Get analytics for a link
-      parameters:
-        - in: path
-          name: shortCode
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Analytics data
-        '404':
-          description: Not found
-  /email/verification-notification:
-    post:
-      summary: Send email verification (auth required)
-      security:
-        - bearerAuth: []
-      responses:
-        '200':
-          description: Verification email sent
-  /email/verify/{id}/{hash}:
-    get:
-      summary: Verify email address
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: string
-        - in: path
-          name: hash
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Email verified
-        '400':
-          description: Invalid verification link
-  /password/email:
-    post:
-      summary: Send password reset email
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                email:
-                  type: string
-      responses:
-        '200':
-          description: Reset link sent
-        '400':
-          description: Unable to send reset link
-  /password/reset:
-    post:
-      summary: Reset password
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                token:
-                  type: string
-                email:
-                  type: string
-                password:
-                  type: string
+                  format: password
+                  example: password123
                 password_confirmation:
                   type: string
-      responses:
-        '200':
-          description: Password reset successful
-        '400':
-          description: Password reset failed
-  /logout:
-    post:
-      summary: Logout (auth required)
-      security:
-        - bearerAuth: []
-      responses:
-        '200':
-          description: Logged out successfully
-  /me:
-    get:
-      summary: Get current user (auth required)
-      security:
-        - bearerAuth: []
-      responses:
-        '200':
-          description: Current user info
-  /tokens:
-    get:
-      summary: List API tokens (auth required)
-      security:
-        - bearerAuth: []
-      responses:
-        '200':
-          description: List of tokens
-    post:
-      summary: Create new API token (auth required)
-      security:
-        - bearerAuth: []
+                  format: password
+                  example: password123
+              type: object
       responses:
         '201':
-          description: Token created
-  /tokens/{tokenId}:
-    delete:
-      summary: Revoke API token (auth required)
+          description: 'User registered successfully'
+          content:
+            application/json:
+              schema:
+                properties:
+                  message: { type: string, example: 'User registered successfully' }
+                  user: { type: object }
+                type: object
+        '422':
+          description: 'Validation error'
+  /login:
+    post:
+      tags:
+        - Authentication
+      summary: 'Login user and get token'
+      operationId: 2dd578ff7aba2721293dac66833b27d1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: john@example.com
+                password:
+                  type: string
+                  format: password
+                  example: password123
+                device_name:
+                  type: string
+                  example: my-iphone
+              type: object
+      responses:
+        '200':
+          description: 'Login successful'
+          content:
+            application/json:
+              schema:
+                properties:
+                  token: { type: string, example: 1|abcdef123456 }
+                type: object
+        '422':
+          description: 'Invalid credentials'
+  /logout:
+    post:
+      tags:
+        - Authentication
+      summary: 'Logout user (revoke current token)'
+      operationId: 68a6108af04af5e3bc1ea68a6c6f1299
+      responses:
+        '200':
+          description: 'Logged out successfully'
+        '401':
+          description: Unauthenticated
       security:
-        - bearerAuth: []
+        -
+          bearerAuth: []
+  /user:
+    get:
+      tags:
+        - Authentication
+      summary: 'Get authenticated user details'
+      operationId: 99e9c2c91427f6bf63c2f0ef765a768f
+      responses:
+        '200':
+          description: 'User details'
+          content:
+            application/json:
+              schema:
+                type: object
+        '401':
+          description: Unauthenticated
+      security:
+        -
+          bearerAuth: []
+  /tokens:
+    get:
+      tags:
+        - Authentication
+      summary: 'List all active tokens for the user'
+      operationId: 9c596701c90fdb0dea8527318361b04c
+      responses:
+        '200':
+          description: 'List of tokens'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+        '401':
+          description: Unauthenticated
+      security:
+        -
+          bearerAuth: []
+  '/tokens/{id}':
+    delete:
+      tags:
+        - Authentication
+      summary: 'Revoke a specific token'
+      operationId: 7652217942796df4a2e03814adea0f03
       parameters:
-        - in: path
-          name: tokenId
+        -
+          name: id
+          in: path
           required: true
           schema:
-            type: string
+            type: integer
       responses:
-        '204':
-          description: Token revoked
+        '200':
+          description: 'Token revoked successfully'
+        '404':
+          description: 'Token not found'
+      security:
+        -
+          bearerAuth: []
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      bearerFormat: JWT
+      scheme: bearer
+tags:
+  -
+    name: Analytics
+    description: Analytics
+  -
+    name: Links
+    description: Links
+  -
+    name: Authentication
+    description: Authentication

@@ -3,111 +3,186 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use App\Http\Requests\StoreLinkRequest;
-use App\DTOs\CreateLinkDTO;
+use App\Models\Link;
 use App\Services\LinkService;
 use App\Services\QrCodeGenerationService;
-use App\Http\Resources\LinkResource;
-use App\Models\Link;
-use App\Queries\UserLinksQuery;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
+use OpenApi\Attributes as OA;
 
 class LinkController extends Controller
 {
-    use AuthorizesRequests;
     public function __construct(
         protected LinkService $linkService,
-        protected QrCodeGenerationService $qrService,
-        protected UserLinksQuery $linkQuery
+        protected QrCodeGenerationService $qrCodeService
     ) {}
 
-    // Update QR branding for a link
-    public function updateQrBranding(\App\Http\Requests\UpdateQrBrandingRequest $request, Link $link): LinkResource
+    #[OA\Get(
+        path: "/links",
+        summary: "Get all links for the authenticated user",
+        security: [["bearerAuth" => []]],
+        tags: ["Links"],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "List of links",
+                content: new OA\JsonContent(type: "array", items: new OA\Items(type: "object"))
+            )
+        ]
+    )]
+    public function index(Request $request)
     {
-        $this->authorize('update', $link);
-        $link = $this->linkService->updateQrBranding(
-            $link, 
-            $request->validated(), 
-            $request->file('logo')
-        );
-        return new LinkResource($link);
+        return $this->linkService->getUserLinks($request->user()->id);
     }
 
-    public function store(StoreLinkRequest $request): LinkResource
-    {
-        $data = $request->validated();
-        if ($request->hasFile('logo')) {
-            $data['logo_path'] = $request->file('logo')->store('qrcodes/logos', 'public');
-        }
-        $data['user_id'] = $request->user()?->id;
-        if (!empty($data['password'])) {
-            $data['password'] = Hash::make($data['password']);
-        }
-        // Handle custom alias and expiration
-        if (!empty($data['custom_alias'])) {
-            $data['short_code'] = $data['custom_alias'];
-        }
-        if (!empty($data['expires_at'])) {
-            $data['expires_at'] = $data['expires_at'];
-        }
-        $dto = CreateLinkDTO::fromArray($data);
-        $link = $this->linkService->createLink($dto);
-        return new LinkResource($link);
-    }
-
-    public function show(Link $link): LinkResource
-    {
-        $link->load('qrCode');
-        return new LinkResource($link);
-    }
-
-    public function downloadQr(string $shortCode)
-    {
-        $link = $this->linkQuery->findWithQrCode($shortCode);
-        
-        $cacheKey = "qrcode_svg_{$link->short_code}_" . md5(serialize($link->qrCode));
-        $qrCodeSvg = Cache::remember($cacheKey, now()->addDays(7), function () use ($link) {
-            return $this->qrService->generateQrCode(url('/' . $link->short_code), $link->qrCode);
-        });
-
-        // Return as downloadable file
-        return response($qrCodeSvg)
-            ->header('Content-Type', 'image/svg+xml')
-            ->header('Content-Disposition', 'attachment; filename="qrcode-' . $link->short_code . '.svg"');
-    }
-
-        // List all links for the authenticated user
-        public function index(Request $request): JsonResponse
-        {
-            $links = $this->linkQuery->getForUser($request->user());
-            return response()->json([
-                'data' => LinkResource::collection($links),
-                'meta' => [
-                    'current_page' => $links->currentPage(),
-                    'last_page' => $links->lastPage(),
-                    'per_page' => $links->perPage(),
-                    'total' => $links->total(),
+    #[OA\Post(
+        path: "/links",
+        summary: "Create a new short link",
+        security: [["bearerAuth" => []]],
+        tags: ["Links"],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ["original_url"],
+                properties: [
+                    new OA\Property(property: "original_url", type: "string", format: "uri", example: "https://google.com"),
+                    new OA\Property(property: "title", type: "string", example: "Google Search")
                 ]
-            ]);
-        }
-
-    // Update a link
-    public function update(\App\Http\Requests\UpdateLinkRequest $request, Link $link): LinkResource
+            )
+        ),
+        responses: [
+            new OA\Response(response: 201, description: "Link created"),
+            new OA\Response(response: 422, description: "Validation error")
+        ]
+    )]
+    public function store(Request $request)
     {
-        $this->authorize('update', $link);
-        $link = $this->linkService->updateLink($link, $request->validated());
-        return new LinkResource($link);
+        $request->validate([
+            'original_url' => 'required|url',
+            'title' => 'nullable|string|max:255',
+        ]);
+
+        $link = $this->linkService->createLink(
+            $request->user()->id,
+            $request->only(['original_url', 'title'])
+        );
+
+        return response()->json($link, 201);
     }
 
-        // Delete a link
-        public function destroy(Request $request, Link $link): JsonResponse
-        {
-            $this->authorize('delete', $link);
-            $link->delete();
-            return response()->json(['message' => 'Link deleted successfully.']);
+    #[OA\Get(
+        path: "/links/{id}",
+        summary: "Get a specific link",
+        security: [["bearerAuth" => []]],
+        tags: ["Links"],
+        parameters: [
+            new OA\Parameter(name: "id", in: "path", required: true, schema: new OA\Schema(type: "integer"))
+        ],
+        responses: [
+            new OA\Response(response: 200, description: "Link details"),
+            new OA\Response(response: 404, description: "Link not found")
+        ]
+    )]
+    public function show($id)
+    {
+        $link = Link::findOrFail($id);
+        $this->authorize('view', $link);
+        return $link->load('qrCode');
+    }
+
+    #[OA\Put(
+        path: "/links/{id}",
+        summary: "Update an existing link",
+        security: [["bearerAuth" => []]],
+        tags: ["Links"],
+        parameters: [
+            new OA\Parameter(name: "id", in: "path", required: true, schema: new OA\Schema(type: "integer"))
+        ],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                properties: [
+                    new OA\Property(property: "original_url", type: "string", format: "uri"),
+                    new OA\Property(property: "title", type: "string")
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(response: 200, description: "Link updated"),
+            new OA\Response(response: 404, description: "Link not found")
+        ]
+    )]
+    public function update(Request $request, $id)
+    {
+        $link = Link::findOrFail($id);
+        $this->authorize('update', $link);
+
+        $request->validate([
+            'original_url' => 'sometimes|url',
+            'title' => 'nullable|string|max:255',
+        ]);
+
+        $link = $this->linkService->updateLink($link, $request->only(['original_url', 'title']));
+        return response()->json($link);
+    }
+
+    #[OA\Delete(
+        path: "/links/{id}",
+        summary: "Delete a link",
+        security: [["bearerAuth" => []]],
+        tags: ["Links"],
+        parameters: [
+            new OA\Parameter(name: "id", in: "path", required: true, schema: new OA\Schema(type: "integer"))
+        ],
+        responses: [
+            new OA\Response(response: 204, description: "Link deleted"),
+            new OA\Response(response: 404, description: "Link not found")
+        ]
+    )]
+    public function destroy($id)
+    {
+        $link = Link::findOrFail($id);
+        $this->authorize('delete', $link);
+        $link->delete();
+        return response()->json(null, 204);
+    }
+
+    #[OA\Post(
+        path: "/links/{id}/qr-branding",
+        summary: "Update QR code branding",
+        security: [["bearerAuth" => []]],
+        tags: ["Links"],
+        parameters: [
+            new OA\Parameter(name: "id", in: "path", required: true, schema: new OA\Schema(type: "integer"))
+        ],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                properties: [
+                    new OA\Property(property: "color", type: "string", example: "#000000"),
+                    new OA\Property(property: "eye_color", type: "string", example: "#ff0000"),
+                    new OA\Property(property: "logo_url", type: "string", format: "uri"),
+                    new OA\Property(property: "style", type: "string", enum: ["square", "round", "dot"])
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(response: 200, description: "Branding updated"),
+            new OA\Response(response: 404, description: "Link not found")
+        ]
+    )]
+    public function updateBranding(Request $request, $id)
+    {
+        $link = Link::findOrFail($id);
+        $this->authorize('update', $link);
+
+        $request->validate([
+            'color' => 'nullable|string|regex:/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/',
+            'eye_color' => 'nullable|string|regex:/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/',
+            'logo_url' => 'nullable|url',
+            'style' => 'nullable|string|in:square,round,dot',
+        ]);
+
+        $qrCode = $this->qrCodeService->updateBranding($link->qrCode, $request->all());
+        return response()->json($qrCode);
     }
 }

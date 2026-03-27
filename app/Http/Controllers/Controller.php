@@ -2,12 +2,26 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Illuminate\Foundation\Bus\DispatchesJobs;
-use Illuminate\Foundation\Validation\ValidatesRequests;
-use Illuminate\Routing\Controller as BaseController;
+use OpenApi\Attributes as OA;
 
-class Controller extends BaseController
+#[OA\Info(
+    title: "QR Code Link Generator API",
+    version: "1.0.0",
+    description: "API documentation for the QR Code Link Generator application."
+)]
+#[OA\Server(
+    url: "http://localhost:8001/api",
+    description: "API Server"
+)]
+#[OA\SecurityScheme(
+    securityScheme: "bearerAuth",
+    type: "http",
+    scheme: "bearer",
+    bearerFormat: "JWT"
+)]
+class Controller extends \Illuminate\Routing\Controller
 {
-    use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
+    use \Illuminate\Foundation\Auth\Access\AuthorizesRequests, 
+        \Illuminate\Foundation\Bus\DispatchesJobs, 
+        \Illuminate\Foundation\Validation\ValidatesRequests;
 }

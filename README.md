@@ -1,13 +1,13 @@
 # 📦 QR Code Link Generator API (Laravel, PHP, PostgreSQL)
 
-A professional, containerized application for generating, managing, and tracking branded QR code links. Built with **Laravel 11**, **Tailwind CSS**, **PostgreSQL**, and **Redis**, following a modern **Service-Query-Repository** architecture.
+A professional, containerized application for generating, managing, and tracking branded QR code links. Built with **Laravel 12**, **Tailwind CSS**, **PostgreSQL**, and **Redis**, following a modern **Service-Query-Repository** architecture.
 
 ## 📑 Summary
 
 This project is a high-performance QR code link management service designed for scalability, security, and a premium user experience.
 
 - **Architecture:** Decoupled business logic using **Service-Query-Repository** patterns.
-- **Frontend:** Modern, responsive dashboard built with **Tailwind CSS** and **Blade**.
+- **Frontend:** Modern, responsive dashboard built with **Tailwind CSS**, **Vite 6**, and **Blade**.
 - **Performance:** Redis-backed caching for QR codes and async job processing for scan tracking.
 - **Analytics:** Integrated **GeoIP** tracking for real-time visitor insights (Country, City, Device, OS).
 - **Security:** Laravel Sanctum for secure authentication and stateful session management.
@@ -194,10 +194,12 @@ This application is designed for both human users via the dashboard and **extern
 
 ## 🛠 Tech Stack
 
-- **Laravel 11**: Modern PHP framework
+- **Laravel 12**: Latest modern PHP framework
 - **PHP 8.4**: Latest PHP features
 - **PostgreSQL**: Robust relational database
-- **Redis**: Queue backend and caching
+- **Redis**: High-performance queue and cache
+- **Vite 6**: Fast asset bundling and HMR
+- **Tailwind CSS**: Modern utility-first CSS framework
 - **Docker Compose**: Orchestration
 - **SimpleSoftwareIO/simple-qrcode**: QR code generation
 

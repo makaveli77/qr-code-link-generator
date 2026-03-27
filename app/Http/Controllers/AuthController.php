@@ -2,114 +2,186 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\LoginRequest;
-use App\Http\Requests\RegisterRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\ValidationException;
+use OpenApi\Attributes as OA;
 
 class AuthController extends Controller
 {
-    public function register(RegisterRequest $request)
+    #[OA\Post(
+        path: "/register",
+        summary: "Register a new user",
+        tags: ["Authentication"],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ["name", "email", "password", "password_confirmation"],
+                properties: [
+                    new OA\Property(property: "name", type: "string", example: "John Doe"),
+                    new OA\Property(property: "email", type: "string", format: "email", example: "john@example.com"),
+                    new OA\Property(property: "password", type: "string", format: "password", example: "password123"),
+                    new OA\Property(property: "password_confirmation", type: "string", format: "password", example: "password123")
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(
+                response: 201,
+                description: "User registered successfully",
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: "message", type: "string", example: "User registered successfully"),
+                        new OA\Property(property: "user", type: "object")
+                    ]
+                )
+            ),
+            new OA\Response(response: 422, description: "Validation error")
+        ]
+    )]
+    public function register(Request $request)
     {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:8|confirmed',
+        ]);
+
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);
 
-        $token = $user->createToken('auth_token')->plainTextToken;
-
         return response()->json([
-            'access_token' => $token,
-            'token_type' => 'Bearer',
+            'message' => 'User registered successfully',
+            'user' => $user,
         ], 201);
     }
 
-    public function login(LoginRequest $request)
+    #[OA\Post(
+        path: "/login",
+        summary: "Login user and get token",
+        tags: ["Authentication"],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ["email", "password"],
+                properties: [
+                    new OA\Property(property: "email", type: "string", format: "email", example: "john@example.com"),
+                    new OA\Property(property: "password", type: "string", format: "password", example: "password123"),
+                    new OA\Property(property: "device_name", type: "string", example: "my-iphone")
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "Login successful",
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: "token", type: "string", example: "1|abcdef123456")
+                    ]
+                )
+            ),
+            new OA\Response(response: 422, description: "Invalid credentials")
+        ]
+    )]
+    public function login(Request $request)
     {
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'required',
+            'device_name' => 'required',
+        ]);
+
         $user = User::where('email', $request->email)->first();
 
-        if (!$user || !Hash::check($request->password, $user->password)) {
-            return response()->json([
-                'message' => 'Invalid credentials'
-            ], 401);
+        if (! $user || ! Hash::check($request->password, $user->password)) {
+            throw ValidationException::withMessages([
+                'email' => ['The provided credentials are incorrect.'],
+            ]);
         }
 
-        $token = $user->createToken('auth_token')->plainTextToken;
-
         return response()->json([
-            'access_token' => $token,
-            'token_type' => 'Bearer',
-            'user' => $user
+            'token' => $user->createToken($request->device_name)->plainTextToken,
         ]);
     }
 
+    #[OA\Post(
+        path: "/logout",
+        summary: "Logout user (revoke current token)",
+        security: [["bearerAuth" => []]],
+        tags: ["Authentication"],
+        responses: [
+            new OA\Response(response: 200, description: "Logged out successfully"),
+            new OA\Response(response: 401, description: "Unauthenticated")
+        ]
+    )]
     public function logout(Request $request)
     {
         $request->user()->currentAccessToken()->delete();
 
-        return response()->json([
-            'message' => 'Logged out successfully'
-        ]);
+        return response()->json(['message' => 'Logged out successfully']);
     }
 
-    public function me(Request $request)
+    #[OA\Get(
+        path: "/user",
+        summary: "Get authenticated user details",
+        security: [["bearerAuth" => []]],
+        tags: ["Authentication"],
+        responses: [
+            new OA\Response(
+                response: 200, 
+                description: "User details",
+                content: new OA\JsonContent(type: "object")
+            ),
+            new OA\Response(response: 401, description: "Unauthenticated")
+        ]
+    )]
+    public function user(Request $request)
     {
         return $request->user();
     }
-    // List all API tokens for the authenticated user
+
+    #[OA\Get(
+        path: "/tokens",
+        summary: "List all active tokens for the user",
+        security: [["bearerAuth" => []]],
+        tags: ["Authentication"],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: "List of tokens",
+                content: new OA\JsonContent(type: "array", items: new OA\Items(type: "object"))
+            ),
+            new OA\Response(response: 401, description: "Unauthenticated")
+        ]
+    )]
     public function tokens(Request $request)
     {
-        $tokens = $request->user()->tokens->map(function ($token) {
-            return [
-                'id' => $token->id,
-                'name' => $token->name,
-                'description' => $token->description,
-                'plain_token' => $token->plain_token,
-                'last_used_at' => $token->last_used_at,
-                'created_at' => $token->created_at,
-            ];
-        });
-        return response()->json(['tokens' => $tokens]);
+        return $request->user()->tokens;
     }
 
-    // Create a new API token with a custom name
-    public function createToken(Request $request)
+    #[OA\Delete(
+        path: "/tokens/{id}",
+        summary: "Revoke a specific token",
+        security: [["bearerAuth" => []]],
+        tags: ["Authentication"],
+        parameters: [
+            new OA\Parameter(name: "id", in: "path", required: true, schema: new OA\Schema(type: "integer"))
+        ],
+        responses: [
+            new OA\Response(response: 200, description: "Token revoked successfully"),
+            new OA\Response(response: 404, description: "Token not found")
+        ]
+    )]
+    public function revokeToken(Request $request, $id)
     {
-        if (!$request->user()->is_partner) {
-            return response()->json(['message' => 'Restricted: Partner account required'], 403);
-        }
-
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string|max:255',
-        ]);
-        
-        $token = $request->user()->createToken($request->name);
-        $accessToken = $token->accessToken;
-        
-        // Save the plain token for dashboard visibility
-        $accessToken->plain_token = $token->plainTextToken;
-        
-        // Save description if provided
-        if ($request->filled('description')) {
-            $accessToken->description = $request->description;
-        }
-        
-        $accessToken->save();
-        
-        return response()->json([
-            'access_token' => $token->plainTextToken,
-            'token_type' => 'Bearer',
-        ], 201);
-    }
-
-    // Revoke (delete) a specific API token by ID
-    public function revokeToken(Request $request, $tokenId)
-    {
-        $token = $request->user()->tokens()->findOrFail($tokenId);
+        $token = $request->user()->tokens()->findOrFail($id);
         $token->delete();
-        return response()->json(['message' => 'Token revoked successfully.']);
+
+        return response()->json(['message' => 'Token revoked successfully']);
     }
 }
