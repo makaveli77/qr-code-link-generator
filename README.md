@@ -260,17 +260,17 @@ docker compose exec app php artisan test
 ```
 .
 ├── app/
-│   ├── Http/Controllers/Api/LinkController.php   # Main API logic
-│   ├── Http/Requests/                           # Validation for all endpoints
-│   ├── Services/                                # Business logic for links/QR
-│   ├── Models/                                  # Eloquent models
-├── resources/views/                             # Blade templates
-├── routes/api.php                               # API route definitions
-├── tests/Feature/                               # Feature tests
-├── tests/Unit/                                  # Unit tests
-├── docker-compose.yml                           # Docker setup
-├── QUEUE_WORKER_PRODUCTION.md                   # Queue worker instructions
-└── README.md                                    # Project documentation
+│   ├── Http/Controllers/Api/   # Main external API logic
+│   ├── Http/Resources/         # API JSON Transformation mappings
+│   ├── Http/Requests/          # Form validation for endpoints
+│   ├── Services/               # Core business logic (Links, QR, Analytics)
+│   ├── Repositories/           # Data layer extraction
+│   └── Models/                 # Eloquent entities (Link, Scan, QrCode)
+├── resources/views/            # Blade templates & Tailwind frontend
+├── routes/                     # api.php, web.php configurations
+├── tests/                      # Full PHPUnit test coverage
+├── docker-compose.yml          # Container configuration
+└── QUEUE_WORKER_PRODUCTION.md  # Queue worker deployment guide
 ```
 
 ---

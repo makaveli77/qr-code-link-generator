@@ -25,11 +25,16 @@ $apiRoutes = function () {
 
     // Link & Analytics Group
     Route::middleware('auth:sanctum')->group(function () {
+        // Links
         Route::get('/links', [App\Http\Controllers\Api\LinkController::class, 'index']);
         Route::get('/links/{link}', [App\Http\Controllers\Api\LinkController::class, 'show']);
         Route::put('/links/{link}', [App\Http\Controllers\Api\LinkController::class, 'update']);
         Route::delete('/links/{link}', [App\Http\Controllers\Api\LinkController::class, 'destroy']);
         Route::put('/links/{link}/qr-branding', [App\Http\Controllers\Api\LinkController::class, 'updateQrBranding']);
+        
+        // Analytics (Authenticated)
+        Route::get('/analytics/overview', [App\Http\Controllers\Api\AnalyticsController::class, 'overview']);
+        Route::get('/links/{link}/analytics', [App\Http\Controllers\Api\AnalyticsController::class, 'linkAnalytics']);
     });
 
     Route::post('/links', [App\Http\Controllers\Api\LinkController::class, 'store']);

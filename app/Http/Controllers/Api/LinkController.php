@@ -31,7 +31,11 @@ class LinkController extends Controller
     )]
     public function index(Request $request)
     {
-        return $this->linkService->getUserLinks($request->user()->id);
+        $links = Link::where('user_id', $request->user()->id)
+            ->with('qrCode')
+            ->paginate();
+            
+        return \App\Http\Resources\LinkResource::collection($links);
     }
 
     #[OA\Post(
@@ -54,19 +58,23 @@ class LinkController extends Controller
             new OA\Response(response: 422, description: "Validation error")
         ]
     )]
-    public function store(Request $request)
+    public function store(\App\Http\Requests\StoreLinkRequest $request)
     {
-        $request->validate([
-            'original_url' => 'required|url',
-            'title' => 'nullable|string|max:255',
-        ]);
+        $data = $request->validated();
+        $data['user_id'] = $request->user()?->id;
+        
+        // Map 'title' fallback since validation doesn't include it in StoreLinkRequest currently
+        $data['title'] = $request->input('title');
+        
+        // Use logo_path if available (since the valid property in DTO is logoPath, usually handled via logo upload but kept simple here)
+        $data['logo_path'] = $request->input('logo_path');
 
-        $link = $this->linkService->createLink(
-            $request->user()->id,
-            $request->only(['original_url', 'title'])
-        );
+        $dto = \App\DTOs\CreateLinkDTO::fromArray($data);
+        $link = $this->linkService->createLink($dto);
 
-        return response()->json($link, 201);
+        return response()->json([
+            'data' => (new \App\Http\Resources\LinkResource($link))->toArray($request)
+        ], 201);
     }
 
     #[OA\Get(
@@ -82,11 +90,10 @@ class LinkController extends Controller
             new OA\Response(response: 404, description: "Link not found")
         ]
     )]
-    public function show($id)
+    public function show(Link $link)
     {
-        $link = Link::findOrFail($id);
         $this->authorize('view', $link);
-        return $link->load('qrCode');
+        return new \App\Http\Resources\LinkResource($link->load('qrCode'));
     }
 
     #[OA\Put(
@@ -111,9 +118,8 @@ class LinkController extends Controller
             new OA\Response(response: 404, description: "Link not found")
         ]
     )]
-    public function update(Request $request, $id)
+    public function update(Request $request, Link $link)
     {
-        $link = Link::findOrFail($id);
         $this->authorize('update', $link);
 
         $request->validate([
@@ -122,7 +128,7 @@ class LinkController extends Controller
         ]);
 
         $link = $this->linkService->updateLink($link, $request->only(['original_url', 'title']));
-        return response()->json($link);
+        return new \App\Http\Resources\LinkResource($link);
     }
 
     #[OA\Delete(
@@ -138,12 +144,11 @@ class LinkController extends Controller
             new OA\Response(response: 404, description: "Link not found")
         ]
     )]
-    public function destroy($id)
+    public function destroy(Link $link)
     {
-        $link = Link::findOrFail($id);
         $this->authorize('delete', $link);
         $link->delete();
-        return response()->json(null, 204);
+        return response()->json(['message' => 'Link deleted successfully.'], 200);
     }
 
     #[OA\Post(
@@ -170,19 +175,35 @@ class LinkController extends Controller
             new OA\Response(response: 404, description: "Link not found")
         ]
     )]
-    public function updateBranding(Request $request, $id)
+    public function updateBranding(Request $request, Link $link)
     {
-        $link = Link::findOrFail($id);
         $this->authorize('update', $link);
 
         $request->validate([
-            'color' => 'nullable|string|regex:/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/',
-            'eye_color' => 'nullable|string|regex:/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/',
+            'color' => ['nullable', 'string', 'regex:/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/'],
+            'eye_color' => ['nullable', 'string', 'regex:/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/'],
             'logo_url' => 'nullable|url',
             'style' => 'nullable|string|in:square,round,dot',
         ]);
 
         $qrCode = $this->qrCodeService->updateBranding($link->qrCode, $request->all());
         return response()->json($qrCode);
+    }
+
+    public function downloadQr($shortCode)
+    {
+        $link = Link::where('short_code', $shortCode)->firstOrFail();
+        
+        $qrData = $link->qrCode;
+
+        if (!$qrData) {
+            abort(404, 'QR Code settings not found.');
+        }
+
+        $svg = $this->qrCodeService->generateQrCode($link->short_url, $qrData);
+
+        return response($svg)
+            ->header('Content-Type', 'image/svg+xml')
+            ->header('Content-Disposition', 'attachment; filename="qrcode-'.$shortCode.'.svg"');
     }
 }

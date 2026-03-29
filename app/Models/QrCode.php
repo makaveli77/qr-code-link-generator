@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class QrCode extends Model
 {
@@ -13,4 +14,9 @@ class QrCode extends Model
         'size',
         'logo_path',
     ];
+
+    public function link(): BelongsTo
+    {
+        return $this->belongsTo(Link::class);
+    }
 }

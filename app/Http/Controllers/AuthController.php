@@ -40,22 +40,19 @@ class AuthController extends Controller
             new OA\Response(response: 422, description: "Validation error")
         ]
     )]
-    public function register(Request $request)
+    public function register(\App\Http\Requests\RegisterRequest $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8|confirmed',
-        ]);
-
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);
 
+        $token = $user->createToken('auth_token')->plainTextToken;
+
         return response()->json([
-            'message' => 'User registered successfully',
+            'access_token' => $token,
+            'token_type' => 'Bearer',
             'user' => $user,
         ], 201);
     }
@@ -88,14 +85,8 @@ class AuthController extends Controller
             new OA\Response(response: 422, description: "Invalid credentials")
         ]
     )]
-    public function login(Request $request)
+    public function login(\App\Http\Requests\LoginRequest $request)
     {
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
-            'device_name' => 'required',
-        ]);
-
         $user = User::where('email', $request->email)->first();
 
         if (! $user || ! Hash::check($request->password, $user->password)) {
@@ -104,8 +95,12 @@ class AuthController extends Controller
             ]);
         }
 
+        $tokenName = $request->device_name ?? 'auth_token';
+
         return response()->json([
-            'token' => $user->createToken($request->device_name)->plainTextToken,
+            'access_token' => $user->createToken($tokenName)->plainTextToken,
+            'token_type' => 'Bearer',
+            'user' => $user,
         ]);
     }
 
@@ -127,7 +122,7 @@ class AuthController extends Controller
     }
 
     #[OA\Get(
-        path: "/user",
+        path: "/me",
         summary: "Get authenticated user details",
         security: [["bearerAuth" => []]],
         tags: ["Authentication"],
@@ -140,7 +135,7 @@ class AuthController extends Controller
             new OA\Response(response: 401, description: "Unauthenticated")
         ]
     )]
-    public function user(Request $request)
+    public function me(Request $request)
     {
         return $request->user();
     }
@@ -161,7 +156,18 @@ class AuthController extends Controller
     )]
     public function tokens(Request $request)
     {
-        return $request->user()->tokens;
+        return response()->json(['tokens' => $request->user()->tokens]);
+    }
+
+    public function createToken(Request $request)
+    {
+        $request->validate(['name' => 'required|string|max:255']);
+        $token = $request->user()->createToken($request->name)->plainTextToken;
+
+        return response()->json([
+            'access_token' => $token,
+            'token_type' => 'Bearer',
+        ], 201);
     }
 
     #[OA\Delete(
@@ -182,6 +188,6 @@ class AuthController extends Controller
         $token = $request->user()->tokens()->findOrFail($id);
         $token->delete();
 
-        return response()->json(['message' => 'Token revoked successfully']);
+        return response()->json(['message' => 'Token revoked successfully.']);
     }
 }

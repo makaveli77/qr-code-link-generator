@@ -30,6 +30,6 @@ docker compose exec -d queue php artisan queue:work
 echo.
 echo ✅ Setup complete!
 echo 🌐 App URL: http://localhost:8001
-echo 📄 Swagger Documentation: http://localhost:8001/api/doc
+echo 📄 Swagger Documentation: http://localhost:8001/api/documentation
 echo ------------------------------------------------------------------
 pause

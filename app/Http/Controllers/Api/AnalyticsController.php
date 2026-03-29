@@ -36,23 +36,40 @@ class AnalyticsController extends Controller
         return $this->analyticsService->getUserOverview($request->user()->id);
     }
 
+    public function show($shortCode)
+    {
+        $link = Link::where('short_code', $shortCode)->firstOrFail();
+        
+        $analytics = $this->analyticsService->getAnalytics($link);
+        
+        return response()->json(array_merge([
+            'short_code' => $link->short_code,
+            'original_url' => $link->original_url,
+        ], $analytics));
+    }
+
     #[OA\Get(
-        path: "/links/{id}/analytics",
+        path: "/links/{link}/analytics",
         summary: "Get detailed analytics for a specific link",
         security: [["bearerAuth" => []]],
         tags: ["Analytics"],
         parameters: [
-            new OA\Parameter(name: "id", in: "path", required: true, schema: new OA\Schema(type: "integer"))
+            new OA\Parameter(name: "link", in: "path", required: true, schema: new OA\Schema(type: "integer"))
         ],
         responses: [
             new OA\Response(response: 200, description: "Link analytics data"),
             new OA\Response(response: 404, description: "Link not found")
         ]
     )]
-    public function linkAnalytics(Request $request, $id)
+    public function linkAnalytics(Request $request, Link $link)
     {
-        $link = Link::findOrFail($id);
         $this->authorize('view', $link);
-        return $this->analyticsService->getLinkAnalytics($link->id);
+        
+        $analytics = $this->analyticsService->getAnalytics($link);
+        
+        return response()->json(array_merge([
+            'short_code' => $link->short_code,
+            'original_url' => $link->original_url,
+        ], $analytics));
     }
 }

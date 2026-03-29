@@ -32,7 +32,7 @@ class LinkService
             'original_url' => $dto->originalUrl,
             'short_code' => $shortCode,
             'expires_at' => $dto->expiresAt,
-            'password' => $dto->password ?? null,
+            'password' => $dto->password ? Hash::make($dto->password) : null,
         ];
 
         $qrData = [
