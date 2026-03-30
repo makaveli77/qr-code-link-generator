@@ -1,11 +1,12 @@
 # 📦 QR Code Link Generator API (Laravel, PHP, PostgreSQL)
 
-A professional, containerized application for generating, managing, and tracking branded QR code links. Built with **Laravel 12**, **Tailwind CSS**, **PostgreSQL**, and **Redis**, following a modern **Service-Query-Repository** architecture.
+A professional, containerized application for generating, managing, and tracking branded QR code links. Built with **Laravel 12**, **Tailwind CSS**, **PostgreSQL**, and **Redis**, and supercharged by an **LLM with RAG (Retrieval-Augmented Generation) System**, following a modern **Service-Query-Repository** architecture.
 
 ## 📑 Summary
 
 This project is a high-performance QR code link management service designed for scalability, security, and a premium user experience.
 
+- **AI Assistant (RAG System):** Integrated **Large Language Model** utilizing **Retrieval-Augmented Generation (RAG)** to provide intelligent, context-aware assistance, automated QR marketing strategies, and dynamic real-time dashboard support.
 - **Architecture:** Decoupled business logic using **Service-Query-Repository** patterns.
 - **Frontend:** Modern, responsive dashboard built with **Tailwind CSS**, **Vite 6**, and **Blade**.
 - **Performance:** Redis-backed caching for QR codes and async job processing for scan tracking.
