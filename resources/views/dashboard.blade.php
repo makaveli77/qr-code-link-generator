@@ -262,6 +262,49 @@
 <!-- Toast Fix: Modern Pill -->
 <div id="toast" class="fixed bottom-8 left-1/2 -translate-x-1/2 md:left-auto md:right-8 md:translate-x-0 bg-gray-900 text-white px-6 py-3.5 rounded-2xl shadow-2xl z-50 hidden transition-all flex items-center gap-3"></div>
 
+<!-- AI Floating Widget -->
+<div class="fixed bottom-8 right-8 z-40 flex flex-col items-end">
+    <!-- Chat Window (Hidden by default) -->
+    <div id="ai-chat-window" class="hidden mb-4 w-80 sm:w-96 bg-[#111827] border border-white/10 rounded-3xl shadow-2xl overflow-hidden flex flex-col transition-all origin-bottom-right">
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-blue-600 to-indigo-600 p-4 flex justify-between items-center text-white">
+            <div class="flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                <h3 class="font-black tracking-tight">AI Assistant</h3>
+            </div>
+            <button onclick="document.getElementById('ai-chat-window').classList.add('hidden')" class="text-white/70 hover:text-white transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+        
+        <!-- Mode Tabs -->
+        <div class="flex border-b border-white/5 bg-white/5">
+            <button id="tab-support" onclick="switchAiMode('support')" class="flex-1 py-3 text-xs font-bold text-white bg-white/10 transition">Ask Support</button>
+            <button id="tab-content" onclick="switchAiMode('content')" class="flex-1 py-3 text-xs font-bold text-gray-400 hover:text-white transition">Generate CTA</button>
+        </div>
+
+        <!-- Chat Area -->
+        <div id="ai-chat-history" class="flex-1 p-4 h-64 overflow-y-auto space-y-4 bg-[#0B0F1A]/50 text-sm">
+            <div class="bg-white/10 text-white p-3 rounded-2xl rounded-tl-sm w-5/6">
+                Hi! I'm your AI Assistant. You can ask me questions about your limits, or ask me to generate a Call-To-Action!
+            </div>
+        </div>
+
+        <!-- Input Area -->
+        <div class="p-3 bg-white/5 border-t border-white/5 flex gap-2">
+            <input type="text" id="ai-input" placeholder="Type your question..." class="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-white text-sm outline-none focus:border-blue-500/50 focus:bg-white/10 transition placeholder-gray-500" onkeypress="if(event.key === 'Enter') sendAiMessage()">
+            <button onclick="sendAiMessage()" class="bg-blue-600 hover:bg-blue-500 text-white p-2.5 rounded-xl transition shadow-lg shrink-0">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Floating Button -->
+    <button onclick="document.getElementById('ai-chat-window').classList.toggle('hidden')" class="bg-gradient-to-r from-blue-600 to-indigo-600 p-4 rounded-full shadow-2xl hover:scale-105 active:scale-95 transition-all flex items-center justify-center group border border-white/10">
+        <svg class="w-6 h-6 text-white group-hover:rotate-12 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+    </button>
+</div>
+
 @php
     $dashboardJsPath = public_path('js/dashboard.js');
     $dashboardJsVersion = file_exists($dashboardJsPath) ? filemtime($dashboardJsPath) : time();

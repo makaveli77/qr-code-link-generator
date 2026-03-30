@@ -17,6 +17,8 @@ class LinkResource extends JsonResource
             'qr_code_download_url' => route('api.links.qr_download', $this->short_code),
             'expires_at' => $this->expires_at?->toIso8601String(),
             'created_at' => $this->created_at->toIso8601String(),
+            'scans_count' => $this->scans_count ?? 0,
+            'last_scanned_at' => $this->scans_max_created_at ? \Carbon\Carbon::parse($this->scans_max_created_at)->diffForHumans() : 'Never',
             'qr_code_settings' => [
                 'color' => $this->qrCode->color ?? '#000000',
                 'background_color' => $this->qrCode->background_color ?? '#ffffff',

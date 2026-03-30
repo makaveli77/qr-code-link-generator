@@ -32,6 +32,8 @@ class LinkController extends Controller
     public function index(Request $request)
     {
         $links = Link::where('user_id', $request->user()->id)
+            ->withCount('scans')
+            ->withMax('scans', 'created_at')
             ->with('qrCode')
             ->paginate();
             

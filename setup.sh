@@ -28,6 +28,9 @@ docker compose exec app php artisan cache:clear
 echo "🧪 Running the test suite..."
 docker compose exec app php artisan test
 
+echo "🧠 Indexing AI Knowledge Base..."
+docker compose exec app php artisan rag:index-docs
+
 echo "⚙️ Starting the queue worker (background)..."
 docker compose exec -d queue php artisan queue:work
 

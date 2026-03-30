@@ -21,6 +21,7 @@ This project is a high-performance QR code link management service designed for 
 - **Custom Aliases:** Users can provide a specific alias (e.g., `my-brand`) for their short links.
 - **Link Expiration:** Set expiration dates for links; expired links return `410 Gone`.
 - **Advanced QR Config:** Customize foreground/background colors and resolution (up to 1000px) directly via the dashboard or API.
+- **Dynamic AI Support & QR Ideas:** Built-in AI chat widget powered by a specialized context agent for dashboard assistance or QR marketing campaign suggestions.
 - **Security:** Integrated password protection for links with a modern dark-mode UI, and a secure Partner API gate.
 - **Partner Program:** Integrated "Partner" status with a toggle in account settings to enable/disable advanced API access.
 - **Account Management:** Premium dark-mode profile page for managing personal identity, security credentials, and partner status.
@@ -32,7 +33,7 @@ This project is a high-performance QR code link management service designed for 
   - **Queries:** Separated data retrieval and aggregation logic for performance and clarity.
 - **Data Integrity:** Soft deletes on links to maintain historical analytics even after removal.
 - **Rate Limiting:** Protects against abuse and spam by limiting link creation per user.
-- **Interactive Dashboard:** Blade UI for managing links, branding, and analytics.
+- **Interactive Dashboard:** Blade UI heavily augmented with Tailwind CSS features for styling links, viewing tokens, downloading QR Code SVGs directly via dynamic modals, and reviewing copy-friendly short links.
 - **Testing Suite:** PHPUnit feature and unit tests.
 
 ---
@@ -180,7 +181,16 @@ This application is designed for both human users via the dashboard and **extern
 | color            | VARCHAR(7)   | Hex color code                    |
 | background_color | VARCHAR(7)   | Hex color code                    |
 | size             | INT          | Size in pixels                    |
-| logo_path        | VARCHAR(255) | (Optional) Logo file path         |
+**PersonalAccessToken** (Custom Model over Sanctum)
+| Column           | Type         | Description                       |
+|------------------|--------------|-----------------------------------|
+| id               | INT          | Primary Key, Auto-increment       |
+| tokenable_type   | VARCHAR      | Owner type (User)                 |
+| tokenable_id     | INT          | Foreign key to users              |
+| name             | VARCHAR(255) | Token name/identifier             |
+| token            | VARCHAR(64)  | SHA-256 hashed Sanctum token      |
+| plain_token      | VARCHAR      | (Custom) Plaintext reference key  |
+| description      | VARCHAR      | (Custom) Optional description     |
 
 ---
 

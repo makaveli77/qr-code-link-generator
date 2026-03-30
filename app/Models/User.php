@@ -26,4 +26,9 @@ class User extends Authenticatable
             'is_partner' => 'boolean',
         ];
     }
+
+    public function links()
+    {
+        return $this->hasMany(Link::class);
+    }
 }

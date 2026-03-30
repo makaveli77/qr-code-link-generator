@@ -161,11 +161,20 @@ class AuthController extends Controller
 
     public function createToken(Request $request)
     {
-        $request->validate(['name' => 'required|string|max:255']);
-        $token = $request->user()->createToken($request->name)->plainTextToken;
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string|max:255'
+        ]);
+        
+        $newToken = $request->user()->createToken($request->name);
+        $newToken->accessToken->plain_token = $newToken->plainTextToken;
+        if ($request->has('description')) {
+            $newToken->accessToken->description = $request->description;
+        }
+        $newToken->accessToken->save();
 
         return response()->json([
-            'access_token' => $token,
+            'access_token' => $newToken->plainTextToken,
             'token_type' => 'Bearer',
         ], 201);
     }

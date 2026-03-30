@@ -35,6 +35,11 @@ $apiRoutes = function () {
         // Analytics (Authenticated)
         Route::get('/analytics/overview', [App\Http\Controllers\Api\AnalyticsController::class, 'overview']);
         Route::get('/links/{link}/analytics', [App\Http\Controllers\Api\AnalyticsController::class, 'linkAnalytics']);
+
+        // AI Services
+        Route::post('/ai/generate-qr-content', [App\Http\Controllers\Api\AIController::class, 'generateQrContent']);
+        Route::post('/ai/ask-support', [App\Http\Controllers\Api\AIController::class, 'askSupport']);
+        Route::post('/ai/agent', [App\Http\Controllers\Api\AIController::class, 'askAgent']);
     });
 
     Route::post('/links', [App\Http\Controllers\Api\LinkController::class, 'store']);
