@@ -11,7 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        DB::statement('CREATE EXTENSION IF NOT EXISTS vector;');
+        if (config('database.default') === 'pgsql') {
+            DB::statement('CREATE EXTENSION IF NOT EXISTS vector;');
+        }
 
         Schema::create('documents', function (Blueprint $table) {
             $table->id();
@@ -21,8 +23,14 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // Add a vector column with 768 dimensions (for Gemini embeddings)
-        DB::statement('ALTER TABLE documents ADD COLUMN embedding vector(3072);');
+        // Add a vector column with 3072 dimensions (for Gemini embeddings)
+        if (config('database.default') === 'pgsql') {
+            DB::statement('ALTER TABLE documents ADD COLUMN embedding vector(3072);');
+        } else {
+            Schema::table('documents', function (Blueprint $table) {
+                $table->json('embedding')->nullable();
+            });
+        }
         // Add an HNSW index to speed up vector searches
         // DB::statement('CREATE INDEX documents_embedding_index.*');
     }

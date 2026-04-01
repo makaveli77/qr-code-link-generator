@@ -56,12 +56,12 @@ class AIController extends Controller
         $question = $request->input('question');
 
         try {
-            // 1. Embed the user's question
+            // Embed the user's question
             $embeddingResponse = Gemini::embeddingModel('gemini-embedding-001')->embedContent($question);
             $questionEmbedding = $embeddingResponse->embedding->values;
             $vectorString = '[' . implode(',', $questionEmbedding) . ']';
 
-            // 2. Perform Similarity Search using pgvector in PostgreSQL
+            // Perform Similarity Search using pgvector in PostgreSQL
             // We use the <-> operator which calculates L2 distance (cosine distance). The closest comes first.
             $closestDocs = DB::select('
                 SELECT title, content, embedding <-> ?::vector AS distance
@@ -70,14 +70,14 @@ class AIController extends Controller
                 LIMIT 2
             ', [$vectorString]);
 
-            // 3. Build context from the closest docs
+            // Build context from the closest docs
             $contextText = "";
             foreach ($closestDocs as $doc) {
                 $contextText .= "--- Document: " . $doc->title . " ---\n";
                 $contextText .= $doc->content . "\n\n";
             }
 
-            // 4. Ask Gemini the final question packed with context
+            // Ask Gemini the final question packed with context
             $prompt = "You are a helpful customer support and strategy consultant for a QR Code platform.\n"
                 . "Use ONLY the following context to answer the user's question. If the answer is not in the context, say 'I don't have information on that, please contact human support.'\n\n"
                 . "CONTEXT:\n" . $contextText . "\n"
@@ -114,7 +114,7 @@ class AIController extends Controller
         $user = $request->user();
 
         try {
-            // --- 1. Gather Knowledge Base Context (RAG) ---
+            // --- Gather Knowledge Base Context (RAG) ---
             $embeddingResponse = Gemini::embeddingModel('gemini-embedding-001')->embedContent($question);
             $questionEmbedding = $embeddingResponse->embedding->values;
             $vectorString = '[' . implode(',', $questionEmbedding) . ']';
@@ -131,7 +131,7 @@ class AIController extends Controller
                 $ragContext .= "--- Document: {$doc->title} ---\n{$doc->content}\n\n";
             }
 
-            // --- 2. Gather User Database State Context ---
+            // --- Gather User Database State Context ---
             // Instead of doing slow round-trip function calls, we eager-load cheap analytics
             // so the LLM acts as an Agent that already "knows" the user's state securely.
             $totalLinks = $user->links()->count();
@@ -147,7 +147,7 @@ class AIController extends Controller
             $userContext .= "Total QR Links Created: {$totalLinks}\n";
             $userContext .= "Total Total QR Scans Received: {$totalScans}\n\n";
 
-            // --- 3. Prompt the Agent ---
+            // --- Prompt the Agent ---
             $prompt = "You are a friendly, highly intelligent Tech Support and Strategy Agent for our QR Code platform.\n"
                 . "You are chatting directly with user {$user->name}.\n"
                 . "If they ask about their account, limits, or analytics, rely ONLY on the 'Logged-In User Database State' provided below. "

@@ -25,7 +25,7 @@ class QrCodeGenerationService
                 ->margin(1);
 
             if ($qrData->logo_path && Storage::disk('public')->exists($qrData->logo_path)) {
-                // Ensure correct relative path handling for logo
+                // Relative path handling for logo
                 $qr->merge('/storage/app/public/' . $qrData->logo_path, .3, true);
             }
 
